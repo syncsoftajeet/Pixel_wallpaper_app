@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:wallpaper_app/controller/apiopenhelper.dart';
-import 'package:wallpaper_app/model/responsemodel.dart';
+import 'package:get/get.dart';
+import 'package:wallpaper_app/controller/home_controller.dart';
 import 'package:wallpaper_app/screen/fullscreen.dart';
 import 'package:wallpaper_app/widgets/category_item.dart';
 import 'package:wallpaper_app/widgets/custom_search_bar.dart';
@@ -14,26 +14,16 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  List<Photos>? imagelist = [];
 
-  @override
-  void initState() {
-    super.initState();
 
-    getAllImages();
-  }
+ final HomerController controller = Get.put(HomerController());
 
-  getAllImages() async {
-    await ApiOperations.getTreandingWallapaper().then((value) {
-      print("--------------------------");
-      imagelist = value?.photos;
-      setState(() {});
-      print(value!.photos!.length);
-    });
-  }
+
+
 
   @override
   Widget build(BuildContext context) {
+    Size size = MediaQuery.of(context).size;
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -65,44 +55,47 @@ class _HomeScreenState extends State<HomeScreen> {
               SizedBox(
                 height: 10,
               ),
-              Container(
-                child: GridView.builder(
-                    physics: BouncingScrollPhysics(),
-                    shrinkWrap: true,
-                    itemCount: imagelist!.length,
-                    gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-                        crossAxisSpacing: 13,
-                        mainAxisSpacing: 10,
-                        childAspectRatio: 2 / 3.5,
-                        maxCrossAxisExtent: 200),
-                    itemBuilder: (context, index) {
-                      return InkWell(
-                          onTap: () {
-                            Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => FullImageScreen(
-                                        imageurl:
-                                            "${imagelist![index].src?.portrait}")));
-                          },
-                          child: Hero(
-                            tag: "${imagelist![index].src?.portrait}",
-                            child: Container(
-                              decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(12)),
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(12),
-                                child: Image.network(
-                                  height: 800,
-                                  width: 50,
-                                  "${imagelist![index].src?.portrait}",
-                                  fit: BoxFit.cover,
-                                ),
-                              ),
-                            ),
-                          ));
-                    }),
-              )
+             Obx(() => controller.isLoading.value == true?Container(
+                 height: size.height/1.5,
+                 width: size.width,
+                 child: Center(child: CircularProgressIndicator())):
+               GridView.builder(
+                   physics: BouncingScrollPhysics(),
+                   shrinkWrap: true,
+                   itemCount: controller.imagelist.length,
+                   gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+                       crossAxisSpacing: 13,
+                       mainAxisSpacing: 10,
+                       childAspectRatio: 2 / 3.5,
+                       maxCrossAxisExtent: 200),
+                   itemBuilder: (context, index) {
+                     return InkWell(
+                         onTap: () {
+                           Navigator.push(
+                               context,
+                               MaterialPageRoute(
+                                   builder: (context) => FullImageScreen(
+                                       imageurl:
+                                       "${controller.imagelist[index].src?.portrait}")));
+                         },
+                         child: Hero(
+                           tag: "${controller.imagelist[index].src?.portrait}",
+                           child: Container(
+                             decoration: BoxDecoration(
+                                 borderRadius: BorderRadius.circular(12)),
+                             child: ClipRRect(
+                               borderRadius: BorderRadius.circular(12),
+                               child: Image.network(
+                                 height: 800,
+                                 width: 50,
+                                 "${controller.imagelist![index].src?.portrait}",
+                                 fit: BoxFit.cover,
+                               ),
+                             ),
+                           ),
+                         ));
+                   }),
+             )
             ],
           ),
         ),

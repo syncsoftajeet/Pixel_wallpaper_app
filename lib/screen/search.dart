@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:wallpaper_app/controller/apiopenhelper.dart';
+import 'package:wallpaper_app/controller/search_controller.dart';
 import 'package:wallpaper_app/model/responsemodel.dart';
 import 'package:wallpaper_app/screen/fullscreen.dart';
 import 'package:wallpaper_app/widgets/category_item.dart';
@@ -17,29 +19,10 @@ class SearchScreen extends StatefulWidget {
 }
 
 class _SearchScreenState extends State<SearchScreen> {
-  List<Photos> searchImagelist = [];
-  var isLoading = false;
 
-  getSearchResult() async{
-    isLoading = true;
-    setState(() {
-    });
-    await ApiOperations.getSearchWallpaper(widget.query).then((value) {
-      searchImagelist = value.photos!;
-      isLoading = false;
-      setState(() {
+  final controller = Get.put(searchController());
 
-      });
-   });
 
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    getSearchResult();
-
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -62,13 +45,13 @@ class _SearchScreenState extends State<SearchScreen> {
               SizedBox(
                 height: 10,
               ),
-              isLoading == true?Container(
+          Obx(() =>     controller.isLoading.value == true?Container(
                 height: 50,
                   width: 50,
                   child: Center(child: CircularProgressIndicator())): GridView.builder(
                   shrinkWrap: true,
                   physics: ScrollPhysics(),
-                  itemCount: searchImagelist.length,
+                  itemCount: controller.searchImagelist.length,
                   gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
                   crossAxisSpacing: 23,
                   mainAxisSpacing: 20,
@@ -76,10 +59,10 @@ class _SearchScreenState extends State<SearchScreen> {
               ), itemBuilder: (context,index){
                 return InkWell(
                   onTap:(){
-                    Navigator.push(context, MaterialPageRoute(builder: (context) => FullImageScreen(imageurl: "${searchImagelist![index].src?.portrait}")));
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => FullImageScreen(imageurl: "${controller.searchImagelist![index].src?.portrait}")));
                   },
                   child: Hero(
-                    tag: "${searchImagelist![index].src?.portrait}",
+                    tag: "${controller.searchImagelist![index].src?.portrait}",
                     child: Container(
                       decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(12),
@@ -93,11 +76,11 @@ class _SearchScreenState extends State<SearchScreen> {
                       ),
                       child: ClipRRect(
                           borderRadius: BorderRadius.circular(12),
-                          child: Image.network(height: 800, width: 50,"${searchImagelist[index].src?.portrait}",fit: BoxFit.cover,)),
+                          child: Image.network(height: 800, width: 50,"${controller.searchImagelist[index].src?.portrait}",fit: BoxFit.cover,)),
                     ),
                   ),
                 );
-              })
+              })),
 
             ],
           ),

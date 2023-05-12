@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:wallpaper_app/controller/search_controller.dart';
 import 'package:wallpaper_app/screen/search.dart';
 
 class CustomSearchBar extends StatelessWidget {
    CustomSearchBar({Key? key}) : super(key: key);
 
-  TextEditingController textEditingController = TextEditingController();
+final controller = Get.put(searchController());
 
   @override
   Widget build(BuildContext context) {
@@ -23,7 +25,7 @@ class CustomSearchBar extends StatelessWidget {
               child: TextFormField(
                 autofocus: false,
                 enableSuggestions: false,
-                controller: textEditingController,
+                controller: controller.textEditingController,
                 style: TextStyle(
                   fontSize: 15
                 ),
@@ -35,12 +37,19 @@ class CustomSearchBar extends StatelessWidget {
                   enabledBorder: InputBorder.none,
                   border: InputBorder.none,
                 ),
+              onChanged: (value) {
+                  if(value.isNotEmpty){
+                    print("---------------");
+                    print(value);
+                    controller.getSearchResult(value.toString());
+                  }
 
+              },
               ),
             ),
             InkWell(
               onTap: (){
-                Navigator.push(context, MaterialPageRoute(builder: (context) => SearchScreen(query: textEditingController.text)));
+                Navigator.push(context, MaterialPageRoute(builder: (context) => SearchScreen(query: controller.textEditingController.text)));
               },
               child:  Icon(Icons.search),
             ),
